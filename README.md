@@ -1,176 +1,114 @@
-🥗 Dr. Nutri — Production GenAI Engine
-
-A production-grade, full-stack Generative AI application built with LangChain, Streamlit, and OpenAI. This project demonstrates enterprise design patterns for LLM systems, including strict input/output guardrails, token-by-token real-time streaming, structured evaluation metrics, and resilient execution chains.
-
-📋 Table of Contents
+Dr. Nutri
+A GenAI nutrition planner with guardrails, live streaming and automated evaluation
 
 Overview
+Dr. Nutri turns a short user request into a tailored, evidence-informed nutrition plan. It is more than a thin wrapper around an LLM: the model call is surrounded by input checks, output checks, real-time streaming and automatic quality scoring, in the way a production LLM service would be.
+
+The project is a practical example of the design patterns used to make LLM applications safer, faster and measurable.
 
 Key Features
-
+Feature	What it does
+Input guardrails	Rejects empty input and blocks known jailbreak and prompt-injection patterns before the model is called
+Output guardrails	Checks the generated plan and shows a warning badge if a rule is violated
+Live streaming	Streams tokens as they are generated, so the user sees text immediately (low time to first token)
+Automated evaluation	Scores each response on structure, formatting, word count and latency, shown as dashboard cards
+Adjustable preferences	User-controlled priorities such as protein, fiber and sugar limits
+Custom interface	Streamlit styling designed to feel like a dietitian consultation
 System Architecture
-
+ User input
+     │
+     ▼
+ ┌─────────────────────────┐
+ │  Input guardrail check  │ ── fails ──► Error message
+ └─────────────────────────┘
+     │ passes
+     ▼
+ ┌─────────────────────────┐
+ │   LangChain execution   │
+ │ (ChatPromptTemplate+LLM)│
+ └─────────────────────────┘
+     │ token stream
+     ▼
+ ┌─────────────────────────┐
+ │  Streamlit live output  │ ◄── live cursor rendering
+ └─────────────────────────┘
+     │
+     ▼
+ ┌─────────────────────────┐
+ │  Output guardrail check │ ── violation ──► Warning badge
+ └─────────────────────────┘
+     │
+     ▼
+ ┌─────────────────────────┐
+ │  Automated evaluation   │ ──► Score cards
+ └─────────────────────────┘
 Tech Stack
-
-Getting Started
-
-Prerequisites
-
-Installation
-
-Environment Setup
-
-Usage
-
-Enterprise Patterns & Concepts
-
-1. Input & Output Guardrails
-
-2. Token-by-Token Streaming
-
-3. Automated Response Evaluation
-
-4. Resilient LangChain Architecture
-
-Project Structure
-
-License
-
-🩺 Overview
-
-Dr. Nutri transforms simple user prompts into tailored, evidence-based nutrition plans. Rather than operating as a raw LLM wrapper, this system demonstrates how to wrap foundation models in safety protocols, performance analytics, and dynamic user interfaces suited for enterprise deployment.
-
-✨ Key Features
-
-🛡️ Multi-Tier Guardrails: Prevents prompt injections, off-topic requests, and unsafe medical claims using regex and semantic filtering.
-
-⚡ Low-Latency Streaming: Real-time token streaming yields instant visual feedback, minimizing Time to First Token (TTFT).
-
-📊 Real-Time Evaluation Engine: Measures output quality across structure adherence, formatting precision, word count, and latency ($s$).
-
-🎨 Interactive UX: Built with custom Streamlit styling mimicking a professional dietitian consultation interface.
-
-⚙️ Configurable Parameters: User-adjustable macro priorities (protein, fiber, sugar limits) and output controls.
-
-🏗️ System Architecture
-
-[ User Input ]
-      │
-      ▼
-┌───────────────────────────────┐
-│     Input Guardrail Check     │ ──(Fails)──► [ Return Error Message ]
-└───────────────────────────────┘
-      │ (Passes)
-      ▼
-┌───────────────────────────────┐
-│     LangChain Execution       │
-│  (ChatPromptTemplate + LLM)   │
-└───────────────────────────────┘
-      │
-      ▼ (Chunk-by-Chunk Token Stream)
-┌───────────────────────────────┐
-│     Streamlit Real-Time UI    │ ◄── [ Live Cursor Rendering ]
-└───────────────────────────────┘
-      │
-      ▼
-┌───────────────────────────────┐
-│    Output Guardrail Check     │ ──(Violations)──► [ Warning Badge ]
-└───────────────────────────────┘
-      │
-      ▼
-┌───────────────────────────────┐
-│   Automated Eval Metrics      │ ──► [ Dashboard Score Cards ]
-└───────────────────────────────┘
-
-
-🛠️ Tech Stack
-
-Core Framework: LangChain Core / langchain-openai
-
-Foundation Model: OpenAI gpt-4o-mini
-
-Frontend / UI: Streamlit
-
+Orchestration: LangChain (langchain-core, langchain-openai)
+Model: OpenAI gpt-4o-mini
+Interface: Streamlit
 Language: Python 3.10+
-
-Security & Quality: Custom Guardrail Expressions & Automated Eval Engines
-
-🚀 Getting Started
-
+Getting Started
 Prerequisites
-
-Python 3.10 or higher installed.
-
-An active OpenAI API Key.
-
+Python 3.10 or higher
+An OpenAI API key
 Installation
-
-Clone the Repository:
-
-git clone https://github.com/your-username/dr-nutri-genai.git
+bash
+# 1. Clone the repository
+git clone https://github.com/<your-username>/dr-nutri-genai.git
 cd dr-nutri-genai
 
-
-Create and Activate Virtual Environment:
-
-# macOS / Linux
-python3 -m venv venv
-source venv/bin/activate
-
-# Windows (PowerShell)
+# 2. Create and activate a virtual environment
 python -m venv venv
-venv\Scripts\Activate.ps1
+source venv/bin/activate            # Windows PowerShell: venv\Scripts\Activate.ps1
 
+# 3. Install dependencies
+pip install -r requirements.txt
 
-Install Dependencies:
+requirements.txt:
 
-pip install streamlit langchain langchain-core langchain-openai
+streamlit
+langchain
+langchain-core
+langchain-openai
+Configuration
 
+Set your OpenAI API key as an environment variable:
 
-Environment Setup
+bash
+export OPENAI_API_KEY="your-openai-api-key"          # macOS / Linux
+$env:OPENAI_API_KEY="your-openai-api-key"            # Windows PowerShell
 
-Set your OpenAI API Key as an environment variable:
+Never commit your key to the repository.
 
-# macOS / Linux
-export OPENAI_API_KEY="your-actual-openai-api-key"
-
-# Windows (PowerShell)
-$env:OPENAI_API_KEY="your-actual-openai-api-key"
-
-
-💻 Usage
-
-Launch the Streamlit application locally:
-
+Run
+bash
 streamlit run app.py
 
+The app opens at http://localhost:8501.
 
-The application will automatically open in your browser at http://localhost:8501.
+How It Works
+1. Input and output guardrails
 
-🧠 Enterprise Patterns & Concepts
+Every request is validated before it reaches the model.
 
-1. Input & Output Guardrails
-
-The application enforces strict validation rules on both inputs and outputs:
-
+python
 def apply_input_guardrails(text: str) -> tuple[bool, str]:
     # 1. Reject empty inputs
     if not text.strip():
         return False, "Input cannot be empty."
 
-    # 2. Block adversarial/jailbreak patterns
+    # 2. Block adversarial / jailbreak patterns
     jailbreak_patterns = [r"ignore previous instructions", r"system prompt", r"bypass"]
     for pattern in jailbreak_patterns:
         if re.search(pattern, text, re.IGNORECASE):
             return False, "Input Guardrail: Adversarial prompt detected."
 
     return True, "Input passed guardrails."
+2. Token-by-token streaming
 
+LangChain's chain.stream() renders tokens as they arrive:
 
-2. Token-by-Token Streaming
-
-By leveraging LangChain's chain.stream(), tokens are rendered immediately as they are generated:
-
+python
 llm = ChatOpenAI(model="gpt-4o-mini", streaming=True)
 chain = prompt | llm
 
@@ -180,61 +118,39 @@ full_response = ""
 for chunk in chain.stream({"count": 5, "preferences": "high protein"}):
     full_response += chunk.content
     stream_container.markdown(f"{full_response}▌")
+3. Automated response evaluation
 
+Each response is scored in code, so quality can be checked without a human reviewer.
 
-3. Automated Response Evaluation
+Metric	Target	Description
+Structure adherence	100%	The requested number of items was generated
+Formatting score	100%	Titles follow the required Markdown format (for example, bold)
+Latency	under 2.0 s	Total response time in seconds
+Word count	Variable	Indicates verbosity and content density
+Extending the Project
 
-Evaluates outputs programmatically to measure compliance without requiring human-in-the-loop validation:
+The chain can be made more robust with LangChain Expression Language (LCEL) features:
 
-Metric
-
-Target
-
-Description
-
-Structure Adherence
-
-100%
-
-Validates that the requested number of items was generated.
-
-Formatting Score
-
-100%
-
-Ensures titles match required markdown formatting (e.g., Bold).
-
-Latency
-
-$< 2.0\text{s}$
-
-Measures total response duration in seconds.
-
-Word Count
-
-Variable
-
-Verifies verbosity and content density.
-
-4. Resilient LangChain Architecture
-
-For enterprise scaling, execution chains can be upgraded using LangChain Expression Language (LCEL) features:
-
-Retries (with_retry): Recovers from transient network glitches.
-
-Fallbacks (with_fallbacks): Automatically routes requests to backup models during primary model outages.
-
-Structured Outputs (with_structured_output): Forces Pydantic schema adherence for downstream microservice integration.
-
-📂 Project Structure
-
+with_retry: recover from temporary network errors.
+with_fallbacks: switch to a backup model if the primary model is unavailable.
+with_structured_output: enforce a Pydantic schema for downstream services.
+Project Structure
+text
 dr-nutri-genai/
-├── app.py              # Main Streamlit UI & LangChain pipeline
+├── app.py              # Streamlit UI and LangChain pipeline
 ├── requirements.txt    # Python dependencies
-├── README.md           # Documentation
-└── .env.example        # Environment variable template
+├── README.md           # Project documentation
+├── .env.example        # Environment variable template
+└── docs/
+    └── screenshot.png  # Screenshot used in this README
+Disclaimer
 
+Dr. Nutri provides general nutrition information for learning and demonstration purposes. It is not medical advice and does not replace a registered dietitian or doctor. People with medical conditions, allergies or special dietary needs should consult a qualified professional.
 
-📄 License
+Limitations
+Guardrails are rule-based, so they can miss new or reworded attacks. They reduce risk but do not remove it.
+Evaluation metrics check format and speed, not whether the nutrition content is correct.
+Latency depends on the model, the network and the length of the request.
+License
 
 Distributed under the MIT License. See LICENSE for details.
